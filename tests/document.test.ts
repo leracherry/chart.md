@@ -125,7 +125,7 @@ describe('README chart extraction', () => {
           fence(body.replace('18', 'bad'), 'chart id="second"'),
       ),
     ).toThrow('Line 16:');
-    expect(() => parseDocument('Intro\n\n```chart\ntype: line\n```')).toThrow(
+    expect(() => parseDocument('Intro\n\n```chart\ntype: area\n```')).toThrow(
       'Line 3: Expected type: bar',
     );
     expect(() => parseDocument('Intro\n\n```chart\n' + body)).toThrow(

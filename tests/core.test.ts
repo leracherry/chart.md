@@ -10,7 +10,9 @@ describe('parse', () => {
       title: 'Bundle size',
       unit: 'KB',
       labels: ['Core', 'CLI'],
-      series: { name: 'Size', values: [18, 31] },
+      x: 'Package',
+      y: 'Size',
+      series: [{ name: 'Size', values: [18, 31] }],
     });
   });
   it('extracts one chart with source line numbers, accepting CRLF and tilde fences', () => {
@@ -36,12 +38,12 @@ describe('parse', () => {
         body
           .replace('| Core | 18 |', '| Core | -1.5e2 |')
           .replace('| CLI | 31 |', '| CLI | 0 |'),
-      ).series.values,
+      ).series[0]!.values,
     ).toEqual([-150, 0]);
   });
   it.each([
-    [body.replace('type: bar', 'type: line'), 'type: bar'],
-    [body.replace('title:', 'source:'), 'Expected type, title, or unit'],
+    [body.replace('type: bar', 'type: area'), 'type: bar'],
+    [body.replace('title:', 'source:'), 'Expected type, title, unit, x, or y'],
     [body.replace('type: bar', 'type: bar\ntype: bar'), 'Duplicate type'],
     [body.replace('18', '18KB'), 'numeric value'],
     [body.replace('18', 'NaN'), 'numeric value'],
@@ -49,16 +51,16 @@ describe('parse', () => {
     [body.replace('18', '1e-12'), 'magnitude'],
     [
       body.replace('| Core | 18 |', '| Core | 18 | 22 |'),
-      'two nonempty columns',
+      'columns to match the header',
     ],
-    [body.replace('| Core |', '| |'), 'two nonempty columns'],
+    [body.replace('| Core |', '| |'), 'nonempty columns'],
     [body.replace('---:', '--:'), 'separator'],
     ['```chart\n' + body, 'unclosed'],
     [
       '```chart\n' + body + '\n```\n```chart\n' + body + '\n```',
       'multiple chart blocks',
     ],
-    ['type: bar', 'two-column Markdown table'],
+    ['type: bar', 'Markdown table'],
   ])('rejects invalid source %#', (source, error) => {
     expect(() => parse(source)).toThrow(error);
   });
@@ -88,7 +90,7 @@ describe('render', () => {
     'handles zero, negative, mixed, and disparate magnitudes: %j',
     (...values) => {
       const chart = parse(body);
-      chart.series.values = values;
+      chart.series[0]!.values = values;
       const svg = render(chart);
       expect(svg).not.toMatch(/NaN|Infinity/);
       for (const match of svg.matchAll(/height="([\d.-]+)"/g))
@@ -97,9 +99,9 @@ describe('render', () => {
   );
   it('validates programmatic definitions', () => {
     const chart = parse(body);
-    chart.series.values = [Infinity];
+    chart.series[0]!.values = [Infinity];
     expect(() => render(chart)).toThrow('value for each label');
-    chart.series.values = [Infinity, 1];
+    chart.series[0]!.values = [Infinity, 1];
     expect(() => render(chart)).toThrow('finite numbers');
   });
   it('calculates zero-inclusive domains', () => {
