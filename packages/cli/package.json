@@ -24,7 +24,7 @@
   "dependencies": {
     "@chartmd/core": "workspace:*"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "homepage": "https://github.com/leracherry/chart.md#readme",
   "bugs": {
     "url": "https://github.com/leracherry/chart.md/issues"

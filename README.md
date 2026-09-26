@@ -202,3 +202,7 @@ see [.changeset/README.md](.changeset/README.md). See [release instructions](.ch
 
 Milestone 4 adds watch and check commands, configuration, Markdown globs, and
 better diagnostics and debug logging.
+
+## License
+
+[MIT](LICENSE).

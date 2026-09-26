@@ -51,5 +51,4 @@ the prepared archive. If the archive differs, increment the version rather than
 trying to replace an immutable npm release. Publishing does not create a GitHub
 release or Git tag automatically.
 
-The initial release candidate is `0.1.0`; its license is pending the owner's choice.
-`UNLICENSED` is the restrictive placeholder until that choice is applied.
+Both packages use the MIT license. Each published archive includes its license.
