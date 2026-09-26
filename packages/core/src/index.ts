@@ -1,2 +1,3 @@
-// The public chart API will be introduced with the first rendering milestone.
-export {};
+export { ChartError, validate, type ChartDefinition } from './model.js';
+export { parse } from './parser.js';
+export { numericDomain, render } from './renderer.js';
