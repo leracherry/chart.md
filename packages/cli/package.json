@@ -1,0 +1,27 @@
+{
+  "name": "chartmd",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generate SVG charts for Markdown documentation.",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "^22.13.0 || >=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leracherry/chart.md.git",
+    "directory": "packages/cli"
+  },
+  "bin": {
+    "chartmd": "./dist/index.js"
+  },
+  "dependencies": {
+    "@chartmd/core": "workspace:*"
+  }
+}
