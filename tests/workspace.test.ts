@@ -32,7 +32,7 @@ describe('built workspace', () => {
   });
 
   it('fails clearly for commands that are not implemented', () => {
-    const result = run('build', 'example.md');
+    const result = run('watch', 'example.md');
     expect(result.status).toBe(1);
     expect(result.stdout).toBe('');
     expect(result.stderr).toContain('unsupported command');
