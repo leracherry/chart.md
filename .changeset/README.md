@@ -22,7 +22,7 @@ Review the package versions, changelogs, and release archives, then commit and p
 an isolated consumer project. It tests the CLI and core import before publication.
 The `workspace:*` dependency becomes the exact core version when pnpm packs it.
 
-The comparison branch is `codex/repository-foundation`; update `baseBranch` in
+The comparison branch is `main`; update `baseBranch` in
 `config.json` if the repository default branch changes.
 
 ## Publish with GitHub Actions
@@ -30,9 +30,9 @@ The comparison branch is `codex/repository-foundation`; update `baseBranch` in
 Run the **Publish npm packages** workflow on the reviewed release commit:
 
 ```sh
-gh workflow run publish.yml --ref codex/repository-foundation -f dry_run=true
+gh workflow run publish.yml --ref main -f dry_run=true
 # After the dry run passes:
-gh workflow run publish.yml --ref codex/repository-foundation -f dry_run=false
+gh workflow run publish.yml --ref main -f dry_run=false
 ```
 
 The workflow checks authentication, runs validation, and uploads the tested
