@@ -9,8 +9,7 @@ Generate static SVG charts from Markdown tables using TypeScript.
 ## Quick start
 
 Milestone 3 supports vertical bars, horizontal bars, and line charts, with up to
-six numeric series per chart. Chart blocks in Markdown compile into named SVG files. Packages remain private while
-the initial API is being developed; run from this checkout.
+six numeric series per chart. Chart blocks in Markdown compile into named SVG files. The first npm release is prepared as `0.1.0`. You can also run from this checkout.
 
 Use Node.js 22.13+ or 24+ and pnpm 10.17.1.
 
@@ -197,7 +196,7 @@ changing package source to refresh the CLI used by integration tests. Use
 - `examples/engine` — line, horizontal, grouped, and signed-data examples.
 
 CI validates Node.js 22 and 24. Run `pnpm changeset` for user-facing changes;
-see [.changeset/README.md](.changeset/README.md). Publishing is not configured.
+see [.changeset/README.md](.changeset/README.md). See [release instructions](.changeset/README.md) for npm publishing.
 
 ## Next milestone
 

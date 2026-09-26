@@ -1,11 +1,11 @@
 {
   "name": "@chartmd/core",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
   "description": "Generate SVG charts for Markdown documentation.",
   "type": "module",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "engines": {
     "node": "^22.13.0 || >=24.0.0"
@@ -23,5 +23,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
+  },
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/leracherry/chart.md#readme",
+  "bugs": {
+    "url": "https://github.com/leracherry/chart.md/issues"
+  },
+  "keywords": [
+    "markdown",
+    "svg",
+    "charts",
+    "readme",
+    "typescript"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

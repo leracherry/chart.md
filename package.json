@@ -14,7 +14,10 @@
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "release:check": "pnpm build && node scripts/release-check.mjs",
+    "release:publish": "node scripts/release-publish.mjs",
+    "release:verify": "node scripts/release-check.mjs --registry"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",
