@@ -1,53 +1,18 @@
 import { ChartError, validate, type ChartDefinition } from './model.js';
+import { findChartBlocks, sourceLines, type SourceLine } from './fences.js';
 
 /** Parse a chart body or a Markdown document containing exactly one chart fence. */
 export function parse(source: string): ChartDefinition {
-  const lines = source
-    .replace(/^\uFEFF/, '')
-    .replace(/\r\n?/g, '\n')
-    .split('\n');
-  const blocks: { text: string; line: number }[][] = [];
-  let fence:
-    | { marker: string; length: number; chart: boolean; line: number }
-    | undefined;
-  let body: { text: string; line: number }[] = [];
-  for (const [index, text] of lines.entries()) {
-    if (fence) {
-      const closing = /^ {0,3}(`{3,}|~{3,})\s*$/.exec(text);
-      if (
-        closing &&
-        closing[1]![0] === fence.marker &&
-        closing[1]!.length >= fence.length
-      ) {
-        if (fence.chart) blocks.push(body);
-        fence = undefined;
-      } else if (fence.chart) body.push({ text, line: index + 1 });
-      continue;
-    }
-    const opening = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(text);
-    if (opening) {
-      const info = opening[2]!.trim();
-      if (/^chart\s/.test(info))
-        throw new ChartError(
-          `Line ${index + 1}: chart fence options are not supported yet.`,
-        );
-      fence = {
-        marker: opening[1]![0]!,
-        length: opening[1]!.length,
-        chart: info === 'chart',
-        line: index + 1,
-      };
-      body = [];
-    }
-  }
-  if (fence?.chart)
-    throw new ChartError(`Line ${fence.line}: unclosed chart fence.`);
+  const lines = sourceLines(source);
+  const blocks = findChartBlocks(lines);
   if (blocks.length > 1)
     throw new ChartError(
       'Expected one chart; multiple chart blocks are not supported by render.',
     );
-  const input =
-    blocks[0] ?? lines.map((text, index) => ({ text, line: index + 1 }));
+  return parseBody(blocks[0]?.body ?? lines);
+}
+
+export function parseBody(input: SourceLine[]): ChartDefinition {
   const nonempty = input.filter(({ text }) => text.trim());
   const metadata = new Map<string, string>();
   let cursor = 0;
