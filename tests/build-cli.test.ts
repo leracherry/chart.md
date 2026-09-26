@@ -158,6 +158,7 @@ it('reports output directory failures without leaving temporary files', () => {
 it.each([
   ['../README.md', '../.github/charts/'],
   ['../examples/readme/README.md', '../examples/readme/charts/'],
+  ['../examples/engine/README.md', '../examples/engine/charts/'],
 ])('keeps the committed demo SVGs reproducible from %s', (markdown, charts) => {
   const input = fileURLToPath(new URL(markdown, import.meta.url));
   const expected = fileURLToPath(new URL(charts, import.meta.url));

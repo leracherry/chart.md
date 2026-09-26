@@ -8,8 +8,8 @@ Generate static SVG charts from Markdown tables using TypeScript.
 
 ## Quick start
 
-Milestone 2 compiles chart blocks in Markdown into named SVG files. Each chart
-supports vertical bars with one numeric series. Packages remain private while
+Milestone 3 supports vertical bars, horizontal bars, and line charts, with up to
+six numeric series per chart. Chart blocks in Markdown compile into named SVG files. Packages remain private while
 the initial API is being developed; run from this checkout.
 
 Use Node.js 22.13+ or 24+ and pnpm 10.17.1.
@@ -41,7 +41,8 @@ The command writes `.github/charts/bundle-size.svg`. Embed it with:
 ```
 
 See [the multiple-chart example](examples/readme/README.md) for a document with
-both explicit and title-derived IDs.
+both explicit and title-derived IDs. See [the chart engine examples](examples/engine/README.md)
+for line charts, horizontal bars, grouped bars, and signed values.
 
 ## CLI
 
@@ -104,17 +105,30 @@ Resolve a collision by adding distinct explicit IDs to the chart fences.
   spaces. Charts inside other fences or standalone HTML comments are ignored.
   Fences inside blockquotes, lists, indented code, and HTML containers are not a
   supported input format. The only supported fence option is `id="..."`.
-- `type: bar` is required. `title:` and `unit:` are optional plain text, with no
-  YAML quoting or nesting. Unknown and duplicate keys are errors.
-- Tables require two columns, a header, a separator, and 1–40 data rows.
+- `type:` is required: `bar`, `horizontal-bar`, or `line`. Optional `title:`,
+  `unit:`, `x:`, and `y:` values are plain text, with no YAML quoting or nesting.
+  `x` and `y` set display captions for the physical axes; they do not select data
+  columns. Captions default to table headers (or `Value` for multiple series).
+  The unit is appended to the numeric axis caption. Unknown and duplicate keys
+  are errors.
+- Tables require 2–7 columns, a header, a separator, and 1–40 data rows.
+  Each numeric column is a series, and series names must be unique.
   Every row must start and end with `|`. Separator cells use at least three dashes
   and optional alignment colons. Escaped pipes and inline Markdown are not parsed.
-- The first column contains labels; the second contains finite decimal or
+- The first column contains labels; all remaining columns contain finite decimal or
   scientific-notation numbers. Negative values and zero are supported. Nonzero
   magnitudes must be between `1e-9` and `1e12`; commas and units in cells are rejected.
-- SVGs use a white background, blue bars, and a zero-inclusive axis. Long category
-  labels and headings are shortened visually; full text remains in accessible
-  descriptions and SVG titles. Charts widen for larger datasets.
+- SVGs use a white background, distinct series colors, and a shared zero-inclusive
+  numeric scale with ticks at multiples of 1, 2, or 5 times a power of ten.
+  Multiple series receive legends. Bars are grouped, not stacked. Lines use
+  markers and distinct dash patterns; all categories are equally spaced in source
+  order, including numeric-looking labels. Missing numeric cells are errors.
+- Numeric labels use compact `k`, `M`, `B`, and `T` suffixes or scientific notation
+  for small values. Precise input values remain in SVG descriptions and titles.
+  Single-series bars show values; multiple-series bars and lines keep values in
+  descriptions and point titles to avoid clutter.
+- Long category labels and headings are shortened visually; full text remains
+  in accessible descriptions and SVG titles. Charts expand to fit larger datasets.
 - Output is deterministic and contains no scripts, network references, or browser
   dependencies. Glob inputs, configuration, watch mode, and publishing are planned
   for later milestones.
@@ -150,9 +164,15 @@ const chart: ChartDefinition = {
   title: 'Bundle size',
   unit: 'KB',
   labels: ['Core', 'CLI'],
-  series: { name: 'Size', values: [18, 31] },
+  series: [{ name: 'Size', values: [18, 31] }],
 };
 ```
+
+### API migration from Milestone 2
+
+`ChartDefinition.series` is now an array, including for a single series. Wrap old
+`{ name, values }` objects in an array. `parse` now includes inferred `x` and `y`
+axis captions. Existing Markdown chart sources continue to work.
 
 ## Development
 
@@ -174,11 +194,12 @@ changing package source to refresh the CLI used by integration tests. Use
 - `tests` — unit, snapshot, and integration tests.
 - `examples/basic` — single-chart render example.
 - `examples/readme` — multiple-chart build example.
+- `examples/engine` — line, horizontal, grouped, and signed-data examples.
 
 CI validates Node.js 22 and 24. Run `pnpm changeset` for user-facing changes;
 see [.changeset/README.md](.changeset/README.md). Publishing is not configured.
 
 ## Next milestone
 
-Milestone 3 adds line charts, horizontal bars, multiple series, axis labels,
-legends, and improved tick calculation and number formatting.
+Milestone 4 adds watch and check commands, configuration, Markdown globs, and
+better diagnostics and debug logging.

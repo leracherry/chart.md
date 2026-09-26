@@ -10,7 +10,7 @@ Usage: chartmd render <input.md> [--output <output.svg>]
        chartmd build <input.md> [--output <directory>]
        chartmd --help
 
-Render one Markdown bar chart to a standalone SVG.
+Render Markdown bar, horizontal-bar, or line charts to standalone SVG.
 render defaults to chart.svg; build defaults to .github/charts.
 Output paths are relative to the current directory.`;
 
