@@ -24,18 +24,15 @@ describe('built workspace', () => {
     expect(result.status).toBe(0);
   });
 
-  it.each([[], ['--help'], ['-h']])(
-    'shows foundation help for %j',
-    (...args) => {
-      const result = run(...args);
-      expect(result.status).toBe(0);
-      expect(result.stderr).toBe('');
-      expect(result.stdout).toContain('Usage: chartmd --help');
-    },
-  );
+  it.each([[], ['--help'], ['-h']])('shows help for %j', (...args) => {
+    const result = run(...args);
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe('');
+    expect(result.stdout).toContain('Usage: chartmd render');
+  });
 
   it('fails clearly for commands that are not implemented', () => {
-    const result = run('render', 'example.md');
+    const result = run('build', 'example.md');
     expect(result.status).toBe(1);
     expect(result.stdout).toBe('');
     expect(result.stderr).toContain('unsupported command');
