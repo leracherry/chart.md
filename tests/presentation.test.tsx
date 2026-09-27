@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { Chart, lineStyles, parseChart } from '../src/index.js';
+import { seriesColor } from '../src/chart.js';
 const definition = {
   type: 'line' as const,
   labels: ['A', 'B'],
@@ -19,11 +20,16 @@ describe('document presentation', () => {
     expect(html).toContain('translate(72 374)');
     expect(html).not.toContain('NaN');
   });
-  it('defaults to plain lines and automatic grey tones without point symbols', () => {
+  it('defaults to plain coloured lines without point symbols', () => {
     const html = renderToStaticMarkup(<Chart definition={definition} />);
     expect(html).not.toContain('data-marker');
     expect(html).not.toContain('stroke-dasharray');
-    expect(html).toContain('chartmd__series--1');
+    expect(html).toContain('--chartmd-series-1, #7856a6');
+    expect(html).toContain('--chartmd-series-2, #3975ad');
+    const colors = Array.from({ length: 20 }, (_, index) =>
+      seriesColor(index).split(', ').slice(1).join(', '),
+    );
+    expect(new Set(colors).size).toBe(20);
   });
   it('supports grid modes through Markdown syntax', () => {
     for (const grid of ['horizontal', 'paper', 'none']) {

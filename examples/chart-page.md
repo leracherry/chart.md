@@ -23,7 +23,7 @@ y: Milliseconds
 
 - API response time fell from **182 ms** to **96 ms**.
 - Worker response time fell from **240 ms** to **123 ms**.
-- Both series use the document's text colour, with opacity and line style
-  distinguishing them.
+- The engine assigns purple and blue automatically, while headings, labels,
+  and guides follow the document theme.
 
-The same source renders on the server and hydrates normally in React.
+Open the source below to change the data or add another numeric column.

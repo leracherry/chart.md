@@ -20,7 +20,7 @@ const definition = {
 const variant = process.argv[3] ?? 'horizontal';
 if (variant === 'paper' || variant === 'none') definition.grid = variant;
 if (variant === 'styles') {
-  definition.title = 'Automatic grey tones';
+  definition.title = 'Automatic series colours';
   definition.y = 'Value';
   definition.series = lineStyles.map((_, i) => ({
     name: ['API', 'Worker', 'Cache', 'Search', 'Storage', 'Queue'][i],
@@ -28,6 +28,14 @@ if (variant === 'styles') {
   }));
 }
 
+const darkPalette = [
+  '#b29ad6',
+  '#79add5',
+  '#6bb6aa',
+  '#ceaa75',
+  '#d68faa',
+  '#a9bc7a',
+];
 const chart = renderToStaticMarkup(
   createElement(Chart, {
     definition,
@@ -37,6 +45,8 @@ const chart = renderToStaticMarkup(
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     },
   }),
+).replace(/var\(--chartmd-series-(\d+),\s*([^)]*)\)/g, (_, index, fallback) =>
+  variant === 'dark' ? darkPalette[Number(index) - 1] : fallback,
 );
 // Resolve default custom properties for librsvg, which does not implement CSS variables.
 // Browser consumers use the original stylesheet and can override every variable.

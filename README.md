@@ -15,19 +15,20 @@ React is a peer dependency. No browser charting library is required.
 
 ## Appearance
 
-Version 0.3 uses plain 1 px lines, quiet grey tones, inherited typography,
+Version 0.4 uses plain 1 px lines, automatically assigned muted colours, inherited typography,
 and readable numeric ticks. The chart background is transparent. No point
 symbols or dash patterns are added by default.
 
-### Automatic series tones
+### Automatic series colours
 
-The engine assigns a grey tone to each series in table-column order. Legends
-use the same tone as their lines. Two or three series work best in this quiet
-style; six tones are available before they repeat. For dense or overlapping
-data, use separate charts or enable `patterns` on the direct React component.
+The engine assigns purple, blue, teal, ochre, rose, and olive in table-column
+order. Additional series receive generated hues instead of repeating those six.
+Legends use the same colours as their lines; text and guides stay neutral.
+Dark mode uses lighter shades. Two to six series are easiest to read; for dense
+or overlapping data, use separate charts or enable `patterns` on the direct React component.
 Accessible descriptions retain series names and exact values.
 
-![Automatic grey series tones](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-styles.png)
+![Automatic series colours](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-styles.png)
 
 ### Optional paper grid
 
@@ -41,8 +42,9 @@ an uncluttered plot, or `grid: horizontal` for the default horizontal guides.
 
 ### Dark documents
 
-The same component follows the document's text colour; no separate chart palette
-or filled chart background is needed.
+The same component follows the document's text colour for labels and guides.
+Series colours adapt to the system theme or an ancestor's `data-theme="dark"`
+or `data-theme="light"` attribute. No filled chart background is needed.
 
 ![Dark document theme](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-dark.png)
 
@@ -124,9 +126,9 @@ Both backtick and tilde Markdown fences are supported.
 
 ## Theme inheritance
 
-Charts use `currentColor`, so they follow the text colour of their Markdown
-container in light mode, dark mode, and custom themes. Multiple series remain
-one-colour and are distinguished with automatically assigned grey tones.
+Labels and guides use `currentColor` to follow the surrounding Markdown theme.
+Series colours are automatic and can be overridden with `--chartmd-series-1`,
+`--chartmd-series-2`, and so on, set on `.chartmd`.
 
 ```css
 .markdown-body {
@@ -204,6 +206,10 @@ requires GitHub authentication and the `@leracherry` scope configured for
 `https://npm.pkg.github.com`; npm remains the default installation route above.
 
 ### Local checks
+
+Run `pnpm demo` and open `http://127.0.0.1:4173` for a real React Markdown page
+with editable chart source and a light/dark switch. The demo renders through the
+package's own plugin and component on the server.
 
 The product direction and release milestones are documented in
 [ROADMAP.md](ROADMAP.md).

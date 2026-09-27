@@ -1,6 +1,22 @@
 import { useId, type HTMLAttributes, type SVGProps } from 'react';
 import type { ChartDefinition } from './types.js';
 
+const palette = [
+  '#7856a6',
+  '#3975ad',
+  '#298078',
+  '#a46d35',
+  '#ac5674',
+  '#687c37',
+];
+/** Additional series receive generated hues instead of cycling the six defaults. */
+export function seriesColor(index: number): string {
+  const fallback =
+    palette[index] ??
+    `hsl(${((index - 6) * 137.508 + 265).toFixed(3)}, 38%, 48%)`;
+  return `var(--chartmd-series-${index + 1}, ${fallback})`;
+}
+
 /** Optional legacy pattern styles; the default presentation uses plain lines. */
 export const lineStyles = [
   { name: 'Solid · circle', dash: '', shape: 'circle' },
@@ -222,7 +238,11 @@ export function Chart({
         y2={y(0)}
       />
       {d.series.map((s, si) => (
-        <g key={si} className={`chartmd__series chartmd__series--${si % 6}`}>
+        <g
+          key={si}
+          className="chartmd__series"
+          style={{ color: seriesColor(si) }}
+        >
           {d.type === 'line' ? (
             <>
               <polyline
@@ -302,33 +322,23 @@ export function Chart({
             key={si}
             transform={`translate(${left + ((si % 3) * plotWidth) / 3} ${legendTop + Math.floor(si / 3) * 26})`}
           >
-            {d.type === 'line' ? (
-              <>
-                <line
-                  className="chartmd__line"
-                  style={{
-                    opacity: patterns
-                      ? 1
-                      : [1, 0.7, 0.5, 0.85, 0.6, 0.4][si % 6],
-                  }}
-                  x1="0"
-                  x2="28"
-                  strokeDasharray={
-                    patterns ? lineStyles[si % 6]!.dash : undefined
-                  }
-                />
-                {patterns && <Marker index={si} x={14} y={0} />}
-              </>
-            ) : (
-              <rect
-                x="0"
-                y="-4"
-                width="24"
-                height="8"
-                fill="currentColor"
-                opacity={[1, 0.7, 0.5, 0.85, 0.6, 0.4][si % 6]}
-              />
-            )}
+            <g style={{ color: seriesColor(si) }}>
+              {d.type === 'line' ? (
+                <>
+                  <line
+                    className="chartmd__line"
+                    x1="0"
+                    x2="28"
+                    strokeDasharray={
+                      patterns ? lineStyles[si % 6]!.dash : undefined
+                    }
+                  />
+                  {patterns && <Marker index={si} x={14} y={0} />}
+                </>
+              ) : (
+                <rect x="0" y="-4" width="24" height="8" fill="currentColor" />
+              )}
+            </g>
             <text className="chartmd__label" x="38" y="4">
               {shorten(s.name, 18)}
               <title>{s.name}</title>

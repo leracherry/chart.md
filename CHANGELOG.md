@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- Assign muted purple, blue, teal, ochre, rose and olive automatically.
+- Generate additional hues beyond the initial palette instead of cycling it.
+- Match legend colours to plot lines and bars; keep labels and guides neutral.
+- Support system and explicit light/dark themes, with per-series CSS overrides.
+- Add an editable Markdown demo page rendered by the actual package.
+- Refresh all README chart previews with the new palette.
+
 ## 0.3.0
 
 - Plain 1 px lines with automatically assigned grey tones; no symbols by default.
