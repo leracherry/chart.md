@@ -1,0 +1,29 @@
+.chartmd {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  block-size: auto;
+  overflow: visible;
+  color: var(--chartmd-color, currentColor);
+  font: inherit;
+}
+
+.chartmd__grid {
+  opacity: var(--chartmd-grid-opacity, 0.14);
+}
+
+.chartmd__axis,
+.chartmd__label,
+.chartmd__legend,
+.chartmd__title {
+  fill: currentColor;
+}
+
+.chartmd__label,
+.chartmd__legend {
+  opacity: var(--chartmd-muted-opacity, 0.68);
+}
+
+.chartmd__title {
+  font-weight: 600;
+}
