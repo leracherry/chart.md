@@ -1,5 +1,5 @@
 {
-  "name": "chartmd",
+  "name": "@leracherry/chartmd",
   "version": "0.1.0",
   "description": "Markdown-native charts for React, styled by your Markdown theme.",
   "type": "module",

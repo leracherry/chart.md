@@ -22,15 +22,15 @@ y: People
 ## Install
 
 ```sh
-npm install chartmd react-markdown
+npm install @leracherry/chartmd react-markdown
 ```
 
 ## Use with React Markdown
 
 ```tsx
 import Markdown from 'react-markdown';
-import { chartComponents, remarkChart } from 'chartmd';
-import 'chartmd/style.css';
+import { chartComponents, remarkChart } from '@leracherry/chartmd';
+import '@leracherry/chartmd/style.css';
 
 export function Article({ source }: { source: string }) {
   return (
@@ -103,7 +103,7 @@ The parser and component are also public when the Markdown renderer is managed
 elsewhere:
 
 ```tsx
-import { Chart, parseChart } from 'chartmd';
+import { Chart, parseChart } from '@leracherry/chartmd';
 
 const definition = parseChart(chartSource);
 return <Chart definition={definition} />;

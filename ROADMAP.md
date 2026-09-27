@@ -17,9 +17,9 @@ native to the document rather than like embedded third-party widgets.
   for series differentiation.
 - Published TypeScript declarations, focused tests, and npm package metadata.
 
-Exit criteria: a consumer can install `chartmd` and `react-markdown`, paste the
-README example, and render a chart without configuration or another charting
-library.
+Exit criteria: a consumer can install `@leracherry/chartmd` and
+`react-markdown`, paste the README example, and render a chart without
+configuration or another charting library.
 
 ## Milestone 2 — Markdown ecosystem coverage
 
