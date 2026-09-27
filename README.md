@@ -49,6 +49,9 @@ export function Article({ source }: { source: string }) {
 `remarkChart` parses and validates chart fences. `chartComponents` renders the
 result as accessible, server-renderable SVG.
 
+See [examples/chart-page.md](examples/chart-page.md) for a complete Markdown
+page with prose, a chart, and follow-up notes.
+
 ## Syntax
 
 The first table column supplies the labels. Every remaining column becomes a
