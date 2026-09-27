@@ -4,7 +4,7 @@ import {
   type ChartType,
 } from './types.js';
 
-const metadataKeys = new Set(['type', 'title', 'x', 'y']);
+const metadataKeys = new Set(['type', 'title', 'x', 'y', 'grid']);
 const separatorCell = /^:?-{3,}:?$/;
 
 function splitRow(row: string, line: number): string[] {
@@ -174,5 +174,13 @@ export function parseChart(source: string): ChartDefinition {
   if (metadata.title) definition.title = metadata.title;
   if (metadata.x) definition.x = metadata.x;
   if (metadata.y) definition.y = metadata.y;
+  if (metadata.grid) {
+    if (!['horizontal', 'paper', 'none'].includes(metadata.grid)) {
+      throw new ChartSyntaxError(
+        'grid must be “horizontal”, “paper”, or “none”',
+      );
+    }
+    definition.grid = metadata.grid as NonNullable<ChartDefinition['grid']>;
+  }
   return definition;
 }

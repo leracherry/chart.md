@@ -21,6 +21,13 @@ Exit criteria: a consumer can install `@leracherry/chartmd` and
 `react-markdown`, paste the README example, and render a chart without
 configuration or another charting library.
 
+## 0.2 — Document presentation (implemented)
+
+- Six consistent line and marker styles with wrapping legends.
+- Transparent, horizontal-grid, and optional paper-grid presentation.
+- Readable tick intervals, exact accessible values, and locale/number formatting.
+- Rendered documentation images for default, paper, no-grid, dark, and six-series views.
+
 ## Milestone 2 — Markdown ecosystem coverage
 
 - Compatibility fixtures for Unified/Remark pipelines beyond `react-markdown`.
@@ -34,7 +41,7 @@ Remark-based React rendering paths.
 ## Milestone 3 — Custom rendering without theme drift
 
 - Component overrides for marks, labels, legends, and tooltips.
-- Locale-aware number formatting.
+- Additional formatting hooks for Markdown integrations.
 - Explicit colour opt-in for teams that need multi-colour series, while keeping
   one-colour inheritance as the default.
 - Visual regression suite for light, dark, narrow, and high-contrast layouts.

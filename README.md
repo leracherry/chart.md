@@ -13,6 +13,46 @@ npm install @leracherry/chartmd react-markdown
 
 React is a peer dependency. No browser charting library is required.
 
+## Appearance
+
+Version 0.2 uses thin strokes, small markers, inherited typography and colour,
+and evenly spaced numeric ticks. The chart background is transparent.
+
+### Six line styles
+
+Every series receives a matching line and marker in both the plot and legend.
+Styles repeat after six series; there is no hard series limit, but two to six
+series are recommended for readability. Legends wrap into rows of three.
+
+![Six line and marker styles](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-styles.png)
+
+1. Solid line with circles
+2. Dashed line with squares
+3. Dotted line with diamonds
+4. Dash-dot line with triangles
+5. Long dashes with plus markers
+6. Short dashes with cross markers
+
+### Optional paper grid
+
+Add `grid: paper` inside the chart fence for a faint square grid. The squares
+are decorative; axis labels define the measurement scale. Use `grid: none` for
+an uncluttered plot, or `grid: horizontal` for the default horizontal guides.
+
+![Paper grid](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-paper.png)
+
+![Chart without grid](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-none.png)
+
+### Dark documents
+
+The same component follows the document's text colour; no separate chart palette
+or filled chart background is needed.
+
+![Dark document theme](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-dark.png)
+
+The previews above are rasterized output from the package's actual React
+component and stylesheet. The white/dark page backgrounds belong to the previews.
+
 ## Quick start
 
 Write a fenced `chart` block anywhere in your Markdown:
@@ -63,6 +103,7 @@ numeric series.
 | `title`  | No       | Accessible chart title and visible heading |
 | `x`      | No       | Horizontal-axis label                      |
 | `y`      | No       | Vertical-axis label                        |
+| `grid`   | No       | `horizontal` (default), `paper`, or `none` |
 
 Values may be positive, negative, or zero. Table rows require the same number
 of cells as the header, and series names must be unique. Invalid input fails
@@ -95,8 +136,10 @@ one-colour and are distinguished with opacity and dash patterns.
 .markdown-body {
   color: #24292f;
   --chartmd-color: currentColor;
-  --chartmd-grid-opacity: 0.14;
-  --chartmd-muted-opacity: 0.68;
+  --chartmd-grid-opacity: 0.1;
+  --chartmd-muted-opacity: 0.8;
+  --chartmd-paper-opacity: 0.07;
+  --chartmd-line-width: 1.75;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -121,12 +164,28 @@ const definition = parseChart(chartSource);
 return <Chart definition={definition} />;
 ```
 
+Use `locale` and standard `Intl.NumberFormat` options for number presentation:
+
+```tsx
+<Chart
+  definition={definition}
+  locale="en-GB"
+  numberFormat={{ style: 'percent', maximumFractionDigits: 1 }}
+/>
+```
+
+Percentage formatting expects fractions (`0.25` becomes `25%`). Accessible
+descriptions retain exact source values. Rendered values must be finite and
+within ±1e12; nonzero magnitudes must be at least 1e-12. Small default values use
+scientific notation. Labels are plain text; Markdown emphasis inside cells is not parsed.
+
 ## API
 
 - `remarkChart` — Remark-compatible Markdown AST plugin.
 - `chartComponents` — component map for `react-markdown`.
 - `Chart` — responsive and accessible React SVG component.
 - `parseChart` — parser for a chart fence body.
+- `lineStyles` — six built-in dash and marker combinations, in series order.
 - `ChartDefinition`, `ChartSeries`, and `ChartType` — TypeScript types.
 
 The renderer uses no canvas, network request, generated image, or client-side
@@ -142,8 +201,15 @@ pnpm install
 pnpm check
 ```
 
-Run `node scripts/render-readme-preview.mjs` after building to regenerate the
-SVG source used for the README preview.
+Generate previews with the real renderer (PNG conversion requires `rsvg-convert`):
+
+```sh
+pnpm build
+node scripts/render-readme-preview.mjs /tmp/chart.svg paper
+rsvg-convert --width 1440 --background-color white /tmp/chart.svg -o docs/chart-paper.png
+```
+
+Available preview variants: `horizontal`, `paper`, `none`, `styles`, and `dark`.
 
 ## License
 

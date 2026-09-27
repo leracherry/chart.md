@@ -1,307 +1,343 @@
-import {
-  useId,
-  type CSSProperties,
-  type HTMLAttributes,
-  type SVGProps,
-} from 'react';
+import { useId, type HTMLAttributes, type SVGProps } from 'react';
 import type { ChartDefinition } from './types.js';
 
-const width = 720;
-const height = 420;
-const margin = { top: 54, right: 24, bottom: 76, left: 72 };
-const plotWidth = width - margin.left - margin.right;
-const plotHeight = height - margin.top - margin.bottom;
-const dashPatterns = ['', '8 5', '2 4', '10 4 2 4', '1 4'];
-
+export const lineStyles = [
+  { name: 'Solid · circle', dash: '', shape: 'circle' },
+  { name: 'Dashed · square', dash: '7 4', shape: 'square' },
+  { name: 'Dotted · diamond', dash: '1 4', shape: 'diamond' },
+  { name: 'Dash-dot · triangle', dash: '8 4 1 4', shape: 'triangle' },
+  { name: 'Long dash · plus', dash: '12 5', shape: 'plus' },
+  { name: 'Short dash · cross', dash: '3 3', shape: 'cross' },
+] as const;
 export interface ChartProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
   definition?: ChartDefinition;
   'data-chart'?: string;
+  locale?: string;
+  numberFormat?: Intl.NumberFormatOptions;
 }
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en', {
-    maximumFractionDigits: 2,
-    notation: Math.abs(value) >= 10_000 ? 'compact' : 'standard',
-  }).format(value);
+function validate(value: unknown): asserts value is ChartDefinition {
+  if (!value || typeof value !== 'object')
+    throw new Error('Invalid chart definition');
+  const d = value as ChartDefinition;
+  if (
+    !['bar', 'line'].includes(d.type) ||
+    !Array.isArray(d.labels) ||
+    !d.labels.length ||
+    !d.labels.every((v) => typeof v === 'string') ||
+    !Array.isArray(d.series) ||
+    !d.series.length ||
+    !d.series.every(
+      (s) =>
+        s &&
+        typeof s.name === 'string' &&
+        Array.isArray(s.values) &&
+        s.values.length === d.labels.length &&
+        s.values.every(
+          (v) =>
+            Number.isFinite(v) &&
+            Math.abs(v) <= 1e12 &&
+            (v === 0 || Math.abs(v) >= 1e-12),
+        ),
+    ) ||
+    [d.title, d.x, d.y].some((v) => v !== undefined && typeof v !== 'string') ||
+    (d.grid !== undefined && !['horizontal', 'paper', 'none'].includes(d.grid))
+  )
+    throw new Error('Invalid chart definition');
 }
-
-function getDomain(definition: ChartDefinition): [number, number] {
-  const values = definition.series.flatMap((series) => series.values);
-  let minimum = Math.min(0, ...values);
-  let maximum = Math.max(0, ...values);
-  if (minimum === maximum) maximum = minimum + 1;
-  const padding = (maximum - minimum) * 0.08;
-  if (minimum < 0) minimum -= padding;
-  if (maximum > 0) maximum += padding;
-  return [minimum, maximum];
+function Marker({ index, x, y }: { index: number; x: number; y: number }) {
+  const shape = lineStyles[index % 6]!.shape;
+  return (
+    <g
+      transform={`translate(${x} ${y})`}
+      className="chartmd__marker"
+      data-marker={shape}
+    >
+      {shape === 'circle' && <circle r="3" />}
+      {shape === 'square' && <rect x="-3" y="-3" width="6" height="6" />}
+      {shape === 'diamond' && <path d="M0 -4 4 0 0 4 -4 0Z" />}
+      {shape === 'triangle' && <path d="M0 -4 4 3 -4 3Z" />}
+      {shape === 'plus' && (
+        <path
+          d="M-4 0H4M0 -4V4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      )}
+      {shape === 'cross' && (
+        <path
+          d="M-3 -3 3 3M-3 3 3 -3"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      )}
+    </g>
+  );
 }
-
-function seriesOpacity(index: number): number {
-  return Math.max(0.38, 0.94 - index * 0.14);
-}
-
 export function Chart({
-  definition: suppliedDefinition,
-  'data-chart': serializedDefinition,
+  definition: supplied,
+  'data-chart': serialized,
+  locale = 'en',
+  numberFormat,
   className,
   style,
-  ...svgProps
+  ...props
 }: ChartProps) {
-  const definition =
-    suppliedDefinition ?? parseSerialized(serializedDefinition);
-  const titleId = `chartmd-title-${useId().replaceAll(':', '')}`;
-  const descriptionId = `${titleId}-description`;
-  const [minimum, maximum] = getDomain(definition);
-  const y = (value: number) => {
-    return margin.top + ((maximum - value) / (maximum - minimum)) * plotHeight;
+  const definition: unknown = supplied ?? JSON.parse(serialized ?? 'null');
+  validate(definition);
+  const d = definition;
+  const id = `chartmd-${useId().replaceAll(':', '')}`;
+  const formatter = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 2,
+    ...numberFormat,
+  });
+  const format = (v: number) => {
+    if (!numberFormat && v !== 0 && Math.abs(v) < 0.01) {
+      return new Intl.NumberFormat(locale, {
+        notation: 'scientific',
+        maximumFractionDigits: 2,
+      }).format(v);
+    }
+    return formatter.format(Object.is(v, -0) ? 0 : v);
   };
-  const zeroY = y(0);
-  const categoryWidth = plotWidth / definition.labels.length;
-  const title =
-    definition.title ?? `${definition.type === 'bar' ? 'Bar' : 'Line'} chart`;
-  const description = definition.series
-    .map((series) => {
-      const values = definition.labels.map(
-        (label, index) =>
-          `${label}: ${formatNumber(series.values[index] ?? 0)}`,
-      );
-      return `${series.name}. ${values.join(', ')}`;
-    })
-    .join('. ');
-  const mergedStyle = {
-    color: 'var(--chartmd-color, currentColor)',
-    ...style,
-  } as CSSProperties;
-
+  let low = 0;
+  let high = 0;
+  for (const s of d.series)
+    for (const v of s.values) {
+      low = Math.min(low, v);
+      high = Math.max(high, v);
+    }
+  const rough = (high - low || 1) / 5;
+  const power = 10 ** Math.floor(Math.log10(rough));
+  const step = ([1, 2, 5, 10].find((n) => n * power >= rough) ?? 10) * power;
+  low = Math.floor(low / step) * step;
+  high = Math.ceil(high / step) * step;
+  if (high === low) high = low + step;
+  const ticks = Array.from(
+    { length: Math.round((high - low) / step) + 1 },
+    (_, i) => low + i * step,
+  );
+  const width = 720;
+  const left = Math.max(
+    72,
+    Math.min(200, Math.max(...ticks.map((v) => format(v).length)) * 7 + 28),
+  );
+  const top = d.title ? 52 : 24;
+  const bottom = 300;
+  const plotWidth = width - left - 24;
+  const category = plotWidth / d.labels.length;
+  const x = (i: number) => left + category * (i + 0.5);
+  const y = (v: number) => bottom - ((v - low) / (high - low)) * (bottom - top);
+  const legendTop = bottom + (d.x ? 70 : 48);
+  const height =
+    legendTop +
+    (d.series.length > 1 ? Math.ceil(d.series.length / 3) * 26 : 0) +
+    14;
+  const title = d.title ?? `${d.type === 'line' ? 'Line' : 'Bar'} chart`;
+  const shorten = (v: string, length: number) =>
+    v.length > length ? `${v.slice(0, length - 1)}…` : v;
+  const stride = Math.max(1, Math.ceil(d.labels.length / 8));
   return (
     <svg
-      {...svgProps}
+      {...props}
       className={['chartmd', className].filter(Boolean).join(' ')}
-      style={mergedStyle}
+      style={style}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
-      aria-labelledby={`${titleId} ${descriptionId}`}
+      aria-labelledby={`${id}-title ${id}-desc`}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <title id={titleId}>{title}</title>
-      <desc id={descriptionId}>{description}</desc>
-
-      {definition.title && (
-        <text className="chartmd__title" x={margin.left} y={25} fontSize={20}>
-          {definition.title}
+      <title id={`${id}-title`}>{title}</title>
+      <desc id={`${id}-desc`}>
+        {d.series
+          .map(
+            (s) =>
+              `${s.name}. ${d.labels.map((label, i) => `${label}: ${s.values[i]}`).join(', ')}`,
+          )
+          .join('. ')}
+      </desc>
+      <defs>
+        <pattern
+          id={`${id}-paper`}
+          width="16"
+          height="16"
+          patternUnits="userSpaceOnUse"
+          x={left}
+          y={top}
+        >
+          <path
+            d="M16 0H0V16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.5"
+          />
+        </pattern>
+      </defs>
+      {d.title && (
+        <text className="chartmd__title" x={left} y="24">
+          {shorten(d.title, 65)}
+          <title>{d.title}</title>
         </text>
       )}
-
-      {Array.from({ length: 5 }, (_, index) => {
-        const value = minimum + ((maximum - minimum) * index) / 4;
-        const gridY = y(value);
-        return (
-          <g key={index}>
+      {d.grid === 'paper' && (
+        <rect
+          className="chartmd__paper"
+          x={left}
+          y={top}
+          width={plotWidth}
+          height={bottom - top}
+          fill={`url(#${id}-paper)`}
+        />
+      )}
+      {ticks.map((value, i) => (
+        <g key={i}>
+          {d.grid !== 'none' && (
             <line
               className="chartmd__grid"
-              x1={margin.left}
-              x2={width - margin.right}
-              y1={gridY}
-              y2={gridY}
-              stroke="currentColor"
+              x1={left}
+              x2={width - 24}
+              y1={y(value)}
+              y2={y(value)}
             />
-            <text
-              className="chartmd__label"
-              x={margin.left - 10}
-              y={gridY + 4}
-              textAnchor="end"
-              fontSize={12}
-            >
-              {formatNumber(value)}
-            </text>
-          </g>
-        );
-      })}
-
+          )}
+          <text
+            className="chartmd__label chartmd__number"
+            x={left - 10}
+            y={y(value) + 4}
+            textAnchor="end"
+          >
+            {format(value)}
+          </text>
+        </g>
+      ))}
       <line
         className="chartmd__axis"
-        x1={margin.left}
-        x2={width - margin.right}
-        y1={zeroY}
-        y2={zeroY}
-        stroke="currentColor"
+        x1={left}
+        x2={width - 24}
+        y1={y(0)}
+        y2={y(0)}
       />
-
-      {definition.type === 'bar'
-        ? definition.labels.flatMap((label, labelIndex) => {
-            const groupWidth = categoryWidth * 0.72;
-            const barWidth = groupWidth / definition.series.length;
-            const groupX =
-              margin.left + labelIndex * categoryWidth + categoryWidth * 0.14;
-            return definition.series.map((series, seriesIndex) => {
-              const value = series.values[labelIndex] ?? 0;
-              const valueY = y(value);
+      {d.series.map((s, si) => (
+        <g key={si}>
+          {d.type === 'line' ? (
+            <>
+              <polyline
+                className="chartmd__line"
+                points={s.values.map((v, i) => `${x(i)},${y(v)}`).join(' ')}
+                strokeDasharray={lineStyles[si % 6]!.dash}
+              />
+              {s.values.map((v, i) => (
+                <g key={i}>
+                  <title>{`${d.labels[i]}, ${s.name}: ${format(v)}`}</title>
+                  <Marker index={si} x={x(i)} y={y(v)} />
+                </g>
+              ))}
+            </>
+          ) : (
+            s.values.map((v, i) => {
+              const bw = (category * 0.72) / d.series.length;
               return (
                 <rect
-                  key={`${label}-${series.name}`}
-                  x={groupX + seriesIndex * barWidth + 1}
-                  y={Math.min(zeroY, valueY)}
-                  width={Math.max(1, barWidth - 2)}
-                  height={Math.max(1, Math.abs(zeroY - valueY))}
+                  key={i}
+                  x={left + category * i + category * 0.14 + bw * si}
+                  y={Math.min(y(v), y(0))}
+                  width={Math.max(0, bw - 2)}
+                  height={Math.abs(y(v) - y(0))}
                   fill="currentColor"
-                  opacity={seriesOpacity(seriesIndex)}
-                  rx={2}
+                  opacity={Math.max(0.4, 0.9 - si * 0.1)}
                 >
-                  <title>{`${label}, ${series.name}: ${formatNumber(value)}`}</title>
+                  <title>{`${d.labels[i]}, ${s.name}: ${format(v)}`}</title>
                 </rect>
               );
-            });
-          })
-        : definition.series.map((series, seriesIndex) => {
-            const points = series.values
-              .map((value, index) => {
-                const x = margin.left + categoryWidth * (index + 0.5);
-                return `${x},${y(value)}`;
-              })
-              .join(' ');
-            return (
-              <g key={series.name} opacity={seriesOpacity(seriesIndex)}>
-                <polyline
-                  points={points}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeDasharray={
-                    dashPatterns[seriesIndex % dashPatterns.length]
-                  }
-                />
-                {series.values.map((value, index) => {
-                  const label = definition.labels[index] ?? '';
-                  return (
-                    <circle
-                      key={label}
-                      cx={margin.left + categoryWidth * (index + 0.5)}
-                      cy={y(value)}
-                      r={4}
-                      fill="currentColor"
-                    >
-                      <title>{`${label}, ${series.name}: ${formatNumber(value)}`}</title>
-                    </circle>
-                  );
-                })}
-              </g>
-            );
-          })}
-
-      {definition.labels.map((label, index) => (
-        <text
-          key={label}
-          className="chartmd__label"
-          x={margin.left + categoryWidth * (index + 0.5)}
-          y={height - margin.bottom + 22}
-          textAnchor="middle"
-          fontSize={12}
-        >
-          {label.length > 14 ? `${label.slice(0, 13)}…` : label}
-          <title>{label}</title>
-        </text>
+            })
+          )}
+        </g>
       ))}
-
-      {definition.x && (
+      {d.labels.map(
+        (label, i) =>
+          i % stride === 0 && (
+            <text
+              key={i}
+              className="chartmd__label"
+              x={x(i)}
+              y={bottom + 23}
+              textAnchor="middle"
+            >
+              {shorten(label, 12)}
+              <title>{label}</title>
+            </text>
+          ),
+      )}
+      {d.x && (
         <text
           className="chartmd__label"
-          x={margin.left + plotWidth / 2}
-          y={height - 12}
+          x={left + plotWidth / 2}
+          y={bottom + 46}
           textAnchor="middle"
-          fontSize={13}
         >
-          {definition.x}
+          {d.x}
         </text>
       )}
-      {definition.y && (
+      {d.y && (
         <text
           className="chartmd__label"
-          transform={`translate(16 ${margin.top + plotHeight / 2}) rotate(-90)`}
+          transform={`translate(16 ${(top + bottom) / 2}) rotate(-90)`}
           textAnchor="middle"
-          fontSize={13}
         >
-          {definition.y}
+          {d.y}
         </text>
       )}
-
-      {definition.series.length > 1 &&
-        definition.series.map((series, index) => (
+      {d.series.length > 1 &&
+        d.series.map((s, si) => (
           <g
-            key={series.name}
-            transform={`translate(${margin.left + index * 130} ${height - 34})`}
-            opacity={seriesOpacity(index)}
+            key={si}
+            transform={`translate(${left + ((si % 3) * plotWidth) / 3} ${legendTop + Math.floor(si / 3) * 26})`}
           >
-            {definition.type === 'bar' ? (
-              <rect width={16} height={10} y={-9} rx={2} fill="currentColor" />
+            {d.type === 'line' ? (
+              <>
+                <line
+                  className="chartmd__line"
+                  x1="0"
+                  x2="28"
+                  strokeDasharray={lineStyles[si % 6]!.dash}
+                />
+                <Marker index={si} x={14} y={0} />
+              </>
             ) : (
-              <line
-                x1={0}
-                x2={18}
-                y1={-4}
-                y2={-4}
-                stroke="currentColor"
-                strokeWidth={3}
-                strokeDasharray={dashPatterns[index % dashPatterns.length]}
+              <rect
+                x="0"
+                y="-4"
+                width="24"
+                height="8"
+                fill="currentColor"
+                opacity={Math.max(0.4, 0.9 - si * 0.1)}
               />
             )}
-            <text className="chartmd__legend" x={24} fontSize={12}>
-              {series.name}
+            <text className="chartmd__label" x="38" y="4">
+              {shorten(s.name, 18)}
+              <title>{s.name}</title>
             </text>
           </g>
         ))}
     </svg>
   );
 }
-
-function parseSerialized(value: string | undefined): ChartDefinition {
-  if (!value) throw new Error('Chart requires a definition');
-  const parsed: unknown = JSON.parse(value);
-  if (!isChartDefinition(parsed)) {
-    throw new Error('Chart received an invalid definition');
-  }
-  return parsed;
-}
-
-function isChartDefinition(value: unknown): value is ChartDefinition {
-  if (!value || typeof value !== 'object') return false;
-  const candidate = value as Partial<ChartDefinition>;
-  return (
-    (candidate.type === 'bar' || candidate.type === 'line') &&
-    Array.isArray(candidate.labels) &&
-    candidate.labels.every((label) => typeof label === 'string') &&
-    Array.isArray(candidate.series) &&
-    candidate.series.length > 0 &&
-    candidate.series.every((series) => {
-      return (
-        typeof series?.name === 'string' &&
-        Array.isArray(series.values) &&
-        series.values.length === candidate.labels?.length &&
-        series.values.every(Number.isFinite)
-      );
-    })
-  );
-}
-
 interface ChartContainerProps extends HTMLAttributes<HTMLDivElement> {
   node?: unknown;
   'data-chart'?: string;
 }
-
 function ChartContainer({
   node,
-  'data-chart': serializedDefinition,
+  'data-chart': serialized,
   children,
   ...props
 }: ChartContainerProps) {
   void node;
-  if (serializedDefinition) {
-    return <Chart data-chart={serializedDefinition} />;
-  }
-  return <div {...props}>{children}</div>;
+  return serialized ? (
+    <Chart data-chart={serialized} />
+  ) : (
+    <div {...props}>{children}</div>
+  );
 }
-
-export const chartComponents = {
-  div: ChartContainer,
-};
+export const chartComponents = { div: ChartContainer };

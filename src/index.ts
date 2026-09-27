@@ -1,4 +1,9 @@
-export { Chart, chartComponents, type ChartProps } from './chart.js';
+export {
+  Chart,
+  chartComponents,
+  lineStyles,
+  type ChartProps,
+} from './chart.js';
 export { parseChart } from './parser.js';
 export { remarkChart } from './remark.js';
 export {
