@@ -175,9 +175,9 @@ export function parseChart(source: string): ChartDefinition {
   if (metadata.x) definition.x = metadata.x;
   if (metadata.y) definition.y = metadata.y;
   if (metadata.grid) {
-    if (!['horizontal', 'paper', 'none'].includes(metadata.grid)) {
+    if (!['both', 'horizontal', 'paper', 'none'].includes(metadata.grid)) {
       throw new ChartSyntaxError(
-        'grid must be “horizontal”, “paper”, or “none”',
+        'grid must be “both”, “horizontal”, “paper”, or “none”',
       );
     }
     definition.grid = metadata.grid as NonNullable<ChartDefinition['grid']>;

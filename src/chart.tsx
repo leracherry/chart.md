@@ -58,7 +58,8 @@ function validate(value: unknown): asserts value is ChartDefinition {
         ),
     ) ||
     [d.title, d.x, d.y].some((v) => v !== undefined && typeof v !== 'string') ||
-    (d.grid !== undefined && !['horizontal', 'paper', 'none'].includes(d.grid))
+    (d.grid !== undefined &&
+      !['both', 'horizontal', 'paper', 'none'].includes(d.grid))
   )
     throw new Error('Invalid chart definition');
 }
@@ -230,13 +231,30 @@ export function Chart({
           </text>
         </g>
       ))}
-      <line
-        className="chartmd__axis"
-        x1={left}
-        x2={width - 24}
-        y1={y(0)}
-        y2={y(0)}
-      />
+      {(d.grid === undefined || d.grid === 'both') &&
+        d.labels.map(
+          (_, i) =>
+            i % stride === 0 && (
+              <line
+                key={`vertical-${i}`}
+                className="chartmd__grid"
+                data-grid="vertical"
+                x1={x(i)}
+                x2={x(i)}
+                y1={top}
+                y2={bottom}
+              />
+            ),
+        )}
+      {d.grid === 'none' && (
+        <line
+          className="chartmd__axis"
+          x1={left}
+          x2={width - 24}
+          y1={y(0)}
+          y2={y(0)}
+        />
+      )}
       {d.series.map((s, si) => (
         <g
           key={si}

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- Make an open-sided, table-style grid the default: horizontal value guides and
+  vertical guides aligned to visible category labels, with no side borders.
+- Use 1 px neutral grey rules matching GitHub-style Markdown table borders,
+  with light/dark themes and custom grid colour, width, and opacity.
+- Add explicit `grid: both`; retain `horizontal`, `paper`, and `none` options.
+- Refresh the live demo, README previews, presentation tests, and roadmap.
+
 ## 0.4.0
 
 - Assign muted purple, blue, teal, ochre, rose and olive automatically.

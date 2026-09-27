@@ -13,8 +13,7 @@ native to the document rather than like embedded third-party widgets.
 - `react-markdown` integration through `remarkChart` and `chartComponents`.
 - Responsive, server-renderable SVG output with accessible titles and data
   descriptions.
-- One-colour rendering based on `currentColor`, with opacity and dash patterns
-  for series differentiation.
+- Theme-inheriting typography and accessible series descriptions.
 - Published TypeScript declarations, focused tests, and npm package metadata.
 
 Exit criteria: a consumer can install `@leracherry/chartmd` and
@@ -27,6 +26,15 @@ configuration or another charting library.
 - Transparent, horizontal-grid, and optional paper-grid presentation.
 - Readable tick intervals, exact accessible values, and locale/number formatting.
 - Rendered documentation images for default, paper, no-grid, dark, and six-series views.
+
+## 0.5 — Minimal Markdown presentation (implemented)
+
+- Automatic muted series colours, with additional generated hues.
+- Thin solid data lines without markers by default; patterns remain opt-in.
+- Open-sided horizontal and vertical grid aligned to axis labels, using the
+  same 1 px grey rules as Markdown tables. No left or right border.
+- System and explicit light/dark themes; custom grid colour and width.
+- Editable React Markdown demo and refreshed previews for every grid mode.
 
 ## Milestone 2 — Markdown ecosystem coverage
 
@@ -42,8 +50,8 @@ Remark-based React rendering paths.
 
 - Component overrides for marks, labels, legends, and tooltips.
 - Additional formatting hooks for Markdown integrations.
-- Explicit colour opt-in for teams that need multi-colour series, while keeping
-  one-colour inheritance as the default.
+- More theme integration fixtures while keeping automatic colours and neutral
+  document structure as the default.
 - Visual regression suite for light, dark, narrow, and high-contrast layouts.
 
 Exit criteria: applications can customize chart behavior deeply without

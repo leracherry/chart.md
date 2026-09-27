@@ -10,7 +10,7 @@ export interface ChartDefinition {
   title?: string;
   x?: string;
   y?: string;
-  grid?: 'horizontal' | 'paper' | 'none';
+  grid?: 'both' | 'horizontal' | 'paper' | 'none';
   labels: string[];
   series: ChartSeries[];
 }

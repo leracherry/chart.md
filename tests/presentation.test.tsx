@@ -32,19 +32,36 @@ describe('document presentation', () => {
     expect(new Set(colors).size).toBe(20);
   });
   it('supports grid modes through Markdown syntax', () => {
-    for (const grid of ['horizontal', 'paper', 'none']) {
+    for (const grid of ['both', 'horizontal', 'paper', 'none']) {
       const d = parseChart(
         `type: line\ngrid: ${grid}\n| X | Y |\n| --- | --- |\n| A | 1 |`,
       );
       const html = renderToStaticMarkup(<Chart definition={d} />);
       expect(html.includes('class="chartmd__paper"')).toBe(grid === 'paper');
       expect(html.includes('class="chartmd__grid"')).toBe(grid !== 'none');
+      expect(html.includes('data-grid="vertical"')).toBe(grid === 'both');
     }
     expect(() =>
       parseChart(
         'type: line\ngrid: invalid\n| X | Y |\n| --- | --- |\n| A | 1 |',
       ),
     ).toThrow('grid must');
+  });
+  it('defaults to an open-sided grid aligned to category centres, for lines and bars', () => {
+    for (const type of ['line', 'bar'] as const) {
+      const html = renderToStaticMarkup(
+        <Chart definition={{ ...definition, type }} />,
+      );
+      const verticals = [
+        ...html.matchAll(/<line[^>]*data-grid="vertical"[^>]*>/g),
+      ].map((m) => m[0]);
+      expect(verticals).toHaveLength(2);
+      expect(verticals[0]).toContain('x1="228" x2="228"');
+      expect(verticals[1]).toContain('x1="540" x2="540"');
+      expect(html).not.toContain('chartmd__axis');
+      expect(html).not.toMatch(/<line[^>]*x1="72" x2="72"/);
+      expect(html).not.toMatch(/<line[^>]*x1="696" x2="696"/);
+    }
   });
   it('keeps exact values accessible and supports percentage formatting', () => {
     const html = renderToStaticMarkup(

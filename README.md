@@ -15,9 +15,15 @@ React is a peer dependency. No browser charting library is required.
 
 ## Appearance
 
-Version 0.4 uses plain 1 px lines, automatically assigned muted colours, inherited typography,
+Version 0.5 uses plain 1 px lines, automatically assigned muted colours, inherited typography,
 and readable numeric ticks. The chart background is transparent. No point
 symbols or dash patterns are added by default.
+
+The default grid has horizontal value guides and vertical guides aligned to
+visible X-axis labels. All guides use the same 1 px neutral grey as GitHub-style
+Markdown table borders, with no left or right border enclosing the plot.
+Markdown itself does not define colours: set `--chartmd-grid-color` to match
+your renderer's table border if it uses a different theme.
 
 ### Automatic series colours
 
@@ -30,11 +36,12 @@ Accessible descriptions retain series names and exact values.
 
 ![Automatic series colours](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-styles.png)
 
-### Optional paper grid
+### Grid options
 
 Add `grid: paper` inside the chart fence for a faint square grid. The squares
 are decorative; axis labels define the measurement scale. Use `grid: none` for
-an uncluttered plot, or `grid: horizontal` for the default horizontal guides.
+an uncluttered plot, or `grid: horizontal` for horizontal guides only.
+Omit `grid` or write `grid: both` for the default open-sided, two-axis grid.
 
 ![Paper grid](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-paper.png)
 
@@ -95,13 +102,13 @@ page with prose, a chart, and follow-up notes.
 The first table column supplies the labels. Every remaining column becomes a
 numeric series.
 
-| Property | Required | Description                                |
-| -------- | -------- | ------------------------------------------ |
-| `type`   | Yes      | `bar` or `line`                            |
-| `title`  | No       | Accessible chart title and visible heading |
-| `x`      | No       | Horizontal-axis label                      |
-| `y`      | No       | Vertical-axis label                        |
-| `grid`   | No       | `horizontal` (default), `paper`, or `none` |
+| Property | Required | Description                                        |
+| -------- | -------- | -------------------------------------------------- |
+| `type`   | Yes      | `bar` or `line`                                    |
+| `title`  | No       | Accessible chart title and visible heading         |
+| `x`      | No       | Horizontal-axis label                              |
+| `y`      | No       | Vertical-axis label                                |
+| `grid`   | No       | `both` (default), `horizontal`, `paper`, or `none` |
 
 Values may be positive, negative, or zero. Table rows require the same number
 of cells as the header, and series names must be unique. Invalid input fails
@@ -126,7 +133,8 @@ Both backtick and tilde Markdown fences are supported.
 
 ## Theme inheritance
 
-Labels and guides use `currentColor` to follow the surrounding Markdown theme.
+Labels use `currentColor` to follow the surrounding Markdown theme. Grid rules
+use light grey (`#d1d9e0`) or dark grey (`#3d444d`) according to the theme.
 Series colours are automatic and can be overridden with `--chartmd-series-1`,
 `--chartmd-series-2`, and so on, set on `.chartmd`.
 
@@ -134,7 +142,8 @@ Series colours are automatic and can be overridden with `--chartmd-series-1`,
 .markdown-body {
   color: #24292f;
   --chartmd-color: currentColor;
-  --chartmd-grid-opacity: 0.08;
+  --chartmd-grid-width: 1;
+  --chartmd-grid-opacity: 1;
   --chartmd-muted-opacity: 0.8;
   --chartmd-paper-opacity: 0.07;
   --chartmd-line-width: 1;
@@ -227,7 +236,7 @@ node scripts/render-readme-preview.mjs /tmp/chart.svg paper
 rsvg-convert --width 1440 --background-color white /tmp/chart.svg -o docs/chart-paper.png
 ```
 
-Available preview variants: `horizontal`, `paper`, `none`, `styles`, and `dark`.
+Available preview variants: `both` (default), `horizontal`, `paper`, `none`, `styles`, and `dark`.
 
 ## License
 

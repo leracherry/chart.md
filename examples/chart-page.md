@@ -25,5 +25,7 @@ y: Milliseconds
 - Worker response time fell from **240 ms** to **123 ms**.
 - The engine assigns purple and blue automatically, while headings, labels,
   and guides follow the document theme.
+- Thin grey guides align with both axes, like Markdown table rules, without
+  enclosing the chart in left or right borders.
 
 Open the source below to change the data or add another numeric column.

@@ -1,4 +1,5 @@
 .chartmd {
+  --chartmd-default-grid-color: #d1d9e0;
   display: block;
   inline-size: 100%;
   max-inline-size: 100%;
@@ -20,6 +21,7 @@
 }
 @media (prefers-color-scheme: dark) {
   .chartmd {
+    --chartmd-default-grid-color: #3d444d;
     --chartmd-series-1: #b29ad6;
     --chartmd-series-2: #79add5;
     --chartmd-series-3: #6bb6aa;
@@ -29,6 +31,7 @@
   }
 }
 [data-theme='dark'] .chartmd {
+  --chartmd-default-grid-color: #3d444d;
   --chartmd-series-1: #b29ad6;
   --chartmd-series-2: #79add5;
   --chartmd-series-3: #6bb6aa;
@@ -37,6 +40,7 @@
   --chartmd-series-6: #a9bc7a;
 }
 [data-theme='light'] .chartmd {
+  --chartmd-default-grid-color: #d1d9e0;
   --chartmd-series-1: #7856a6;
   --chartmd-series-2: #3975ad;
   --chartmd-series-3: #298078;
@@ -46,15 +50,15 @@
 }
 .chartmd__grid,
 .chartmd__axis {
-  stroke: currentColor;
-  stroke-width: 1;
+  stroke: var(--chartmd-grid-color, var(--chartmd-default-grid-color));
+  stroke-width: var(--chartmd-grid-width, 1);
   vector-effect: non-scaling-stroke;
 }
 .chartmd__grid {
-  opacity: var(--chartmd-grid-opacity, 0.08);
+  opacity: var(--chartmd-grid-opacity, 1);
 }
 .chartmd__axis {
-  opacity: 0.15;
+  opacity: var(--chartmd-grid-opacity, 1);
 }
 .chartmd__paper {
   opacity: var(--chartmd-paper-opacity, 0.07);

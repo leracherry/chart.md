@@ -17,8 +17,9 @@ const definition = {
     { name: 'Worker', values: [240, 205, 176, 149, 123] },
   ],
 };
-const variant = process.argv[3] ?? 'horizontal';
-if (variant === 'paper' || variant === 'none') definition.grid = variant;
+const variant = process.argv[3] ?? 'both';
+if (['both', 'horizontal', 'paper', 'none'].includes(variant))
+  definition.grid = variant;
 if (variant === 'styles') {
   definition.title = 'Automatic series colours';
   definition.y = 'Value';
@@ -50,10 +51,12 @@ const chart = renderToStaticMarkup(
 );
 // Resolve default custom properties for librsvg, which does not implement CSS variables.
 // Browser consumers use the original stylesheet and can override every variable.
-const css = (await readFile(resolve('style.css'), 'utf8')).replace(
-  /var\(--[\w-]+,\s*([^)]*)\)/g,
-  '$1',
-);
+const css = (await readFile(resolve('style.css'), 'utf8'))
+  .replace(
+    'var(--chartmd-grid-color, var(--chartmd-default-grid-color))',
+    variant === 'dark' ? '#3d444d' : '#d1d9e0',
+  )
+  .replace(/var\(--[\w-]+,\s*([^)]*)\)/g, '$1');
 const svg = chart.replace('>', `><style>${css}</style>`);
 
 await mkdir(dirname(output), { recursive: true });
