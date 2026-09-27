@@ -20,10 +20,10 @@ const definition = {
 const variant = process.argv[3] ?? 'horizontal';
 if (variant === 'paper' || variant === 'none') definition.grid = variant;
 if (variant === 'styles') {
-  definition.title = 'Six line styles · one document colour';
+  definition.title = 'Automatic grey tones';
   definition.y = 'Value';
-  definition.series = lineStyles.map((s, i) => ({
-    name: s.name.replace('Dash-dot · triangle', 'Dash-dot · tri.'),
+  definition.series = lineStyles.map((_, i) => ({
+    name: ['API', 'Worker', 'Cache', 'Search', 'Storage', 'Queue'][i],
     values: [30, 38, 34, 42, 39].map((v) => v + i * 35),
   }));
 }

@@ -15,23 +15,19 @@ React is a peer dependency. No browser charting library is required.
 
 ## Appearance
 
-Version 0.2 uses thin strokes, small markers, inherited typography and colour,
-and evenly spaced numeric ticks. The chart background is transparent.
+Version 0.3 uses plain 1 px lines, quiet grey tones, inherited typography,
+and readable numeric ticks. The chart background is transparent. No point
+symbols or dash patterns are added by default.
 
-### Six line styles
+### Automatic series tones
 
-Every series receives a matching line and marker in both the plot and legend.
-Styles repeat after six series; there is no hard series limit, but two to six
-series are recommended for readability. Legends wrap into rows of three.
+The engine assigns a grey tone to each series in table-column order. Legends
+use the same tone as their lines. Two or three series work best in this quiet
+style; six tones are available before they repeat. For dense or overlapping
+data, use separate charts or enable `patterns` on the direct React component.
+Accessible descriptions retain series names and exact values.
 
-![Six line and marker styles](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-styles.png)
-
-1. Solid line with circles
-2. Dashed line with squares
-3. Dotted line with diamonds
-4. Dash-dot line with triangles
-5. Long dashes with plus markers
-6. Short dashes with cross markers
+![Automatic grey series tones](https://raw.githubusercontent.com/leracherry/chart.md/main/docs/chart-styles.png)
 
 ### Optional paper grid
 
@@ -130,16 +126,16 @@ Both backtick and tilde Markdown fences are supported.
 
 Charts use `currentColor`, so they follow the text colour of their Markdown
 container in light mode, dark mode, and custom themes. Multiple series remain
-one-colour and are distinguished with opacity and dash patterns.
+one-colour and are distinguished with automatically assigned grey tones.
 
 ```css
 .markdown-body {
   color: #24292f;
   --chartmd-color: currentColor;
-  --chartmd-grid-opacity: 0.1;
+  --chartmd-grid-opacity: 0.08;
   --chartmd-muted-opacity: 0.8;
   --chartmd-paper-opacity: 0.07;
-  --chartmd-line-width: 1.75;
+  --chartmd-line-width: 1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -185,7 +181,7 @@ scientific notation. Labels are plain text; Markdown emphasis inside cells is no
 - `chartComponents` — component map for `react-markdown`.
 - `Chart` — responsive and accessible React SVG component.
 - `parseChart` — parser for a chart fence body.
-- `lineStyles` — six built-in dash and marker combinations, in series order.
+- `lineStyles` — optional legacy dash and marker combinations used by `<Chart patterns />`.
 - `ChartDefinition`, `ChartSeries`, and `ChartType` — TypeScript types.
 
 The renderer uses no canvas, network request, generated image, or client-side

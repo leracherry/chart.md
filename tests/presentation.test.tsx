@@ -11,11 +11,19 @@ const definition = {
 };
 describe('document presentation', () => {
   it('uses six distinct markers and wraps its legend into a second row', () => {
-    const html = renderToStaticMarkup(<Chart definition={definition} />);
+    const html = renderToStaticMarkup(
+      <Chart definition={definition} patterns />,
+    );
     for (const { shape } of lineStyles)
       expect(html).toContain(`data-marker="${shape}"`);
     expect(html).toContain('translate(72 374)');
     expect(html).not.toContain('NaN');
+  });
+  it('defaults to plain lines and automatic grey tones without point symbols', () => {
+    const html = renderToStaticMarkup(<Chart definition={definition} />);
+    expect(html).not.toContain('data-marker');
+    expect(html).not.toContain('stroke-dasharray');
+    expect(html).toContain('chartmd__series--1');
   });
   it('supports grid modes through Markdown syntax', () => {
     for (const grid of ['horizontal', 'paper', 'none']) {

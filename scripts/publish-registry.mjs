@@ -32,7 +32,7 @@ if (result.status === 0) {
     'npm',
     [
       'publish',
-      `release/${archive}`,
+      `./release/${archive}`,
       '--registry',
       registry,
       '--access',

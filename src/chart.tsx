@@ -1,6 +1,7 @@
 import { useId, type HTMLAttributes, type SVGProps } from 'react';
 import type { ChartDefinition } from './types.js';
 
+/** Optional legacy pattern styles; the default presentation uses plain lines. */
 export const lineStyles = [
   { name: 'Solid · circle', dash: '', shape: 'circle' },
   { name: 'Dashed · square', dash: '7 4', shape: 'square' },
@@ -14,6 +15,7 @@ export interface ChartProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
   'data-chart'?: string;
   locale?: string;
   numberFormat?: Intl.NumberFormatOptions;
+  patterns?: boolean;
 }
 function validate(value: unknown): asserts value is ChartDefinition {
   if (!value || typeof value !== 'object')
@@ -80,6 +82,7 @@ export function Chart({
   'data-chart': serialized,
   locale = 'en',
   numberFormat,
+  patterns = false,
   className,
   style,
   ...props
@@ -219,18 +222,24 @@ export function Chart({
         y2={y(0)}
       />
       {d.series.map((s, si) => (
-        <g key={si}>
+        <g key={si} className={`chartmd__series chartmd__series--${si % 6}`}>
           {d.type === 'line' ? (
             <>
               <polyline
                 className="chartmd__line"
                 points={s.values.map((v, i) => `${x(i)},${y(v)}`).join(' ')}
-                strokeDasharray={lineStyles[si % 6]!.dash}
-              />
+                strokeDasharray={
+                  patterns ? lineStyles[si % 6]!.dash : undefined
+                }
+              >
+                <title>{s.name}</title>
+              </polyline>
               {s.values.map((v, i) => (
                 <g key={i}>
                   <title>{`${d.labels[i]}, ${s.name}: ${format(v)}`}</title>
-                  <Marker index={si} x={x(i)} y={y(v)} />
+                  {(patterns || s.values.length === 1) && (
+                    <Marker index={patterns ? si : 0} x={x(i)} y={y(v)} />
+                  )}
                 </g>
               ))}
             </>
@@ -245,7 +254,6 @@ export function Chart({
                   width={Math.max(0, bw - 2)}
                   height={Math.abs(y(v) - y(0))}
                   fill="currentColor"
-                  opacity={Math.max(0.4, 0.9 - si * 0.1)}
                 >
                   <title>{`${d.labels[i]}, ${s.name}: ${format(v)}`}</title>
                 </rect>
@@ -298,11 +306,18 @@ export function Chart({
               <>
                 <line
                   className="chartmd__line"
+                  style={{
+                    opacity: patterns
+                      ? 1
+                      : [1, 0.7, 0.5, 0.85, 0.6, 0.4][si % 6],
+                  }}
                   x1="0"
                   x2="28"
-                  strokeDasharray={lineStyles[si % 6]!.dash}
+                  strokeDasharray={
+                    patterns ? lineStyles[si % 6]!.dash : undefined
+                  }
                 />
-                <Marker index={si} x={14} y={0} />
+                {patterns && <Marker index={si} x={14} y={0} />}
               </>
             ) : (
               <rect
@@ -311,7 +326,7 @@ export function Chart({
                 width="24"
                 height="8"
                 fill="currentColor"
-                opacity={Math.max(0.4, 0.9 - si * 0.1)}
+                opacity={[1, 0.7, 0.5, 0.85, 0.6, 0.4][si % 6]}
               />
             )}
             <text className="chartmd__label" x="38" y="4">
