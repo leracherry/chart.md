@@ -1,4 +1,4 @@
-name: Publish npm packages
+name: Publish release
 
 on:
   workflow_dispatch:
@@ -7,17 +7,24 @@ on:
         description: Validate and pack without publishing
         type: boolean
         default: true
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
 
 concurrency:
-  group: npm-release
+  group: chartmd-release
   cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      packages: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,38 +35,37 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           cache: pnpm
-      - name: Check npm authentication
-        if: ${{ !inputs.dry_run }}
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Validate release tag
+        if: github.ref_type == 'tag'
+        run: test "$GITHUB_REF_NAME" = "v$(node -p "require('./package.json').version")"
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - name: Preview package contents
-        run: npm pack --dry-run
-      - name: Publish package
-        if: ${{ !inputs.dry_run }}
+      - name: Pack once for both registries and release download
         run: |
-          package_name="$(node -p "require('./package.json').name")"
-          package_version="$(node -p "require('./package.json').version")"
-          published_version="$(npm view "$package_name@$package_version" version 2>/dev/null || true)"
-          if [ "$published_version" = "$package_version" ]; then
-            echo "$package_name@$package_version is already published"
-          else
-            npm publish
-          fi
+          mkdir -p release
+          npm pack --json --pack-destination release > release/pack.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: release/*.tgz
+      - name: Publish to npm
+        if: github.event_name == 'push' || !inputs.dry_run
+        run: node scripts/publish-registry.mjs https://registry.npmjs.org/
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Verify public package access
-        if: ${{ !inputs.dry_run }}
-        run: |
-          package_name="$(node -p "require('./package.json').name")"
-          access_status="$(npm access get status "$package_name" --json)"
-          echo "$access_status"
-          node --input-type=module -e '
-            const status = JSON.parse(process.argv[1]);
-            const packageName = process.argv[2];
-            if (status !== "public" && status[packageName] !== "public") process.exit(1);
-          ' "$access_status" "$package_name"
+      - uses: actions/setup-node@v4
+        if: github.event_name == 'push' || !inputs.dry_run
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: '@leracherry'
+      - name: Publish to GitHub Packages
+        if: github.event_name == 'push' || !inputs.dry_run
+        run: node scripts/publish-registry.mjs https://npm.pkg.github.com/
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release and upload package
+        if: github.event_name == 'push' || !inputs.dry_run
+        run: node scripts/github-release.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

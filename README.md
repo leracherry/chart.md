@@ -193,6 +193,22 @@ effect. It works with server rendering and hydration.
 
 ## Development
 
+### Publishing
+
+The **Publish release** workflow validates and builds the package once, then
+publishes the same archive to npm and GitHub Packages and attaches it to a
+GitHub Release. It runs when a `v*` tag is pushed, or manually with `dry_run`
+disabled. Tag versions must match `package.json`; release notes come from
+`CHANGELOG.md`. Existing registry versions are skipped so partial releases can
+be retried. Dry runs only validate and upload a workflow artifact.
+
+The workflow uses `NPM_TOKEN` for npm and the repository's automatic
+`GITHUB_TOKEN` for GitHub Packages and Releases. GitHub Packages installation
+requires GitHub authentication and the `@leracherry` scope configured for
+`https://npm.pkg.github.com`; npm remains the default installation route above.
+
+### Local checks
+
 The product direction and release milestones are documented in
 [ROADMAP.md](ROADMAP.md).
 
